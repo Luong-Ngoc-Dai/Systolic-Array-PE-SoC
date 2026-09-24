@@ -24,9 +24,8 @@ Thiết kế được thực hiện bằng **Verilog HDL** và kiểm tra chức
 Kiến trúc tổng thể của hệ thống:
 
 ```mermaid
-![Kiến trúc hệ thống](images/system_architecture.png)
-
 ```
+![Kiến trúc hệ thống](images/system_architecture.png)
 
 Trong đó:
 
@@ -43,9 +42,8 @@ Trong đó:
 Systolic Array được xây dựng từ nhiều Processing Element (PE) được kết nối với nhau.
 
 ```mermaid
-![Systolic PE](images/Systolic-Pe.png)>
-
 ```
+![Systolic PE](images/Systolic-Pe.png)>
 
 Các PE thực hiện tính toán theo từng chu kỳ clock và truyền dữ liệu trung gian sang các PE lân cận.
 
@@ -58,9 +56,8 @@ Kiến trúc này cho phép nhiều phép tính được thực hiện song song
 Processing Element là đơn vị tính toán cơ bản của Systolic Array.
 
 ```mermaid
-![Processing Element](images/pe_architecture.png)>
-
 ```
+![Processing Element](images/pe_architecture.png)>
 
 Mỗi PE thực hiện các phép toán cần thiết cho quá trình nhân ma trận, đồng thời truyền dữ liệu và kết quả trung gian sang các PE tiếp theo.
 

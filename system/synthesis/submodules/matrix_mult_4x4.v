@@ -1,0 +1,228 @@
+// =============================================================================
+// Module  : matrix_mult_4x4.v
+// Project : FP16 Matrix Multiplication Accelerator
+// Board   : Altera DE2 (Cyclone II EP2C35F672C6)
+// Author  : Student
+// Date    : 2025
+//
+// Description:
+//   Nhân hai ma trận 4x4 với phần tử kiểu FP16.
+//   Kết quả: C[4x4] = A[4x4] x B[4x4]
+//
+//   Kiến trúc:
+//   - FSM điều khiển tuần tự từng phần tử C[i][j]
+//   - Mỗi C[i][j] = sum(A[i][k]*B[k][j]) với k=0..3
+//   - Sử dụng 1 fp16_mult + 1 fp16_add theo kiểu pipeline nối tiếp
+//
+//   Giao diện:
+//   - Nạp ma trận A, B qua cổng addr/data_in
+//   - Đọc kết quả C qua cổng addr/data_out
+//   - Tín hiệu start/done để điều khiển
+// =============================================================================
+
+module matrix_mult_4x4 (
+    input         clk,
+    input         rst_n,
+
+    // Giao diện nạp dữ liệu ma trận A (16 phần tử FP16)
+    input  [3:0]  wr_addr_a,    // Địa chỉ ghi (0-15 cho 4x4)
+    input  [15:0] wr_data_a,    // Dữ liệu FP16
+    input         wr_en_a,      // Write enable
+
+    // Giao diện nạp dữ liệu ma trận B (16 phần tử FP16)
+    input  [3:0]  wr_addr_b,
+    input  [15:0] wr_data_b,
+    input         wr_en_b,
+
+    // Điều khiển
+    input         start,        // Bắt đầu tính toán
+    output reg    done,         // Tính xong
+
+    // Đọc kết quả ma trận C
+    input  [3:0]  rd_addr_c,    // Địa chỉ đọc (0-15)
+    output [15:0] rd_data_c     // Dữ liệu FP16 kết quả
+);
+
+// ===========================================================================
+// Bộ nhớ ma trận (RAM đơn giản bằng reg arrays)
+// ===========================================================================
+reg [15:0] mem_A [0:15]; // Ma trận A: A[i][j] = mem_A[i*4 + j]
+reg [15:0] mem_B [0:15]; // Ma trận B: B[i][j] = mem_B[i*4 + j]
+reg [15:0] mem_C [0:15]; // Ma trận kết quả C
+
+// Ghi dữ liệu vào A và B
+always @(posedge clk) begin
+    if (wr_en_a) mem_A[wr_addr_a] <= wr_data_a;
+    if (wr_en_b) mem_B[wr_addr_b] <= wr_data_b;
+end
+
+// Đọc kết quả C
+assign rd_data_c = mem_C[rd_addr_c];
+
+// ===========================================================================
+// FSM điều khiển tính toán
+// ===========================================================================
+localparam IDLE        = 3'd0;
+localparam LOAD_MULT   = 3'd1; // Nạp toán hạng cho nhân
+localparam WAIT_MULT   = 3'd2; // Chờ nhân hoàn tất (3 cycle)
+localparam LOAD_ADD    = 3'd3; // Nạp toán hạng cho cộng
+localparam WAIT_ADD    = 3'd4; // Chờ cộng hoàn tất (4 cycle)
+localparam NEXT_K      = 3'd5; // Sang k tiếp theo
+localparam STORE_C     = 3'd6; // Lưu C[i][j]
+localparam DONE        = 3'd7;
+
+reg [2:0]  state;
+reg [1:0]  idx_i, idx_j, idx_k; // Chỉ số vòng lặp i, j, k (0..3)
+reg [15:0] accum;                // Bộ tích lũy (partial sum)
+
+// Kết nối tới fp16_mult
+reg         mult_valid_in;
+reg  [15:0] mult_a, mult_b;
+wire [15:0] mult_result;
+wire        mult_valid_out;
+
+// Kết nối tới fp16_add
+reg         add_valid_in;
+reg  [15:0] add_a, add_b;
+wire [15:0] add_result;
+wire        add_valid_out;
+
+// ===========================================================================
+// Instantiate arithmetic units
+// ===========================================================================
+fp16_mult u_mult (
+    .clk       (clk),
+    .rst_n     (rst_n),
+    .a         (mult_a),
+    .b         (mult_b),
+    .valid_in  (mult_valid_in),
+    .result    (mult_result),
+    .valid_out (mult_valid_out)
+);
+
+fp16_add u_add (
+    .clk       (clk),
+    .rst_n     (rst_n),
+    .a         (add_a),
+    .b         (add_b),
+    .valid_in  (add_valid_in),
+    .result    (add_result),
+    .valid_out (add_valid_out)
+);
+
+// ===========================================================================
+// FSM Logic
+// ===========================================================================
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        state         <= IDLE;
+        done          <= 1'b0;
+        idx_i         <= 2'd0;
+        idx_j         <= 2'd0;
+        idx_k         <= 2'd0;
+        accum         <= 16'h0000; // FP16 +0
+        mult_valid_in <= 1'b0;
+        add_valid_in  <= 1'b0;
+    end else begin
+        // Default: không kích hoạt
+        mult_valid_in <= 1'b0;
+        add_valid_in  <= 1'b0;
+
+        case (state)
+            // -----------------------------------------------------------
+            IDLE: begin
+                if (start) begin
+						  done  <= 1'b0;
+                    idx_i    <= 2'd0;
+                    idx_j    <= 2'd0;
+                    idx_k    <= 2'd0;
+                    accum    <= 16'h0000;
+                    state    <= LOAD_MULT;
+                end
+            end
+
+            // -----------------------------------------------------------
+            // Nạp A[i][k] và B[k][j] vào bộ nhân
+            LOAD_MULT: begin
+                mult_a        <= mem_A[{idx_i, idx_k}]; // A[i][k]
+                mult_b        <= mem_B[{idx_k, idx_j}]; // B[k][j]
+                mult_valid_in <= 1'b1;
+                state         <= WAIT_MULT;
+            end
+
+            // -----------------------------------------------------------
+            // Chờ 3 chu kỳ pipeline của bộ nhân
+            WAIT_MULT: begin
+                if (mult_valid_out) begin
+                    // Kết quả nhân sẽ ra ở pipe_cnt=3 (valid_out)
+                    state <= LOAD_ADD;
+                end
+            end
+
+            // -----------------------------------------------------------
+            // Nạp kết quả nhân và accumulator vào bộ cộng
+            LOAD_ADD: begin
+                // Tại đây mult_valid_out = 1 (sau 3 cycle)
+                add_a        <= mult_result; // A[i][k] * B[k][j]
+                add_b        <= accum;       // Partial sum hiện tại
+                add_valid_in <= 1'b1;
+                state        <= WAIT_ADD;
+            end
+
+            // -----------------------------------------------------------
+            // Chờ 4 chu kỳ pipeline của bộ cộng
+            WAIT_ADD: begin
+                if (add_valid_out) begin
+                    // add_valid_out = 1
+                    accum <= add_result; // Cập nhật accumulator
+                    state <= NEXT_K;
+                end
+            end
+
+            // -----------------------------------------------------------
+            // Tăng k, kiểm tra vòng lặp
+            NEXT_K: begin
+                if (idx_k == 2'd3) begin
+                    // Đã tính xong k=0..3 => lưu C[i][j]
+                    state <= STORE_C;
+                end else begin
+                    idx_k <= idx_k + 2'd1;
+                    state <= LOAD_MULT;
+                end
+            end
+
+            // -----------------------------------------------------------
+            // Lưu kết quả và sang phần tử tiếp theo
+            STORE_C: begin
+                mem_C[{idx_i, idx_j}] <= accum;
+                accum <= 16'h0000; // Reset accumulator cho C[i][j] tiếp
+
+                if (idx_j == 2'd3) begin
+                    if (idx_i == 2'd3) begin
+                        // Tính xong toàn bộ ma trận
+                        state <= DONE;
+                    end else begin
+                        idx_i <= idx_i + 2'd1;
+                        idx_j <= 2'd0;
+                        idx_k <= 2'd0;
+                        state <= LOAD_MULT;
+                    end
+                end else begin
+                    idx_j <= idx_j + 2'd1;
+                    idx_k <= 2'd0;
+                    state <= LOAD_MULT;
+                end
+            end
+
+            // -----------------------------------------------------------
+            DONE: begin
+                done  <= 1'b1;
+                state <= IDLE;
+            end
+
+            default: state <= IDLE;
+        endcase
+    end
+end
+
+endmodule

@@ -1,0 +1,20 @@
+
+State Machine - |de2_top|system:u0|matrix_mult_avalon:matrix_0|matrix_mult_4x4:u_core|state
+Name state.DONE state.STORE_C state.NEXT_K state.WAIT_ADD state.LOAD_ADD state.WAIT_MULT state.LOAD_MULT state.IDLE 
+state.IDLE 0 0 0 0 0 0 0 0 
+state.LOAD_MULT 0 0 0 0 0 0 1 1 
+state.WAIT_MULT 0 0 0 0 0 1 0 1 
+state.LOAD_ADD 0 0 0 0 1 0 0 1 
+state.WAIT_ADD 0 0 0 1 0 0 0 1 
+state.NEXT_K 0 0 1 0 0 0 0 1 
+state.STORE_C 0 1 0 0 0 0 0 1 
+state.DONE 1 0 0 0 0 0 0 1 
+
+State Machine - |de2_top|system:u0|system_nios2_qsys_0:nios2_qsys_0|system_nios2_qsys_0_nios2_oci:the_system_nios2_qsys_0_nios2_oci|system_nios2_qsys_0_jtag_debug_module_wrapper:the_system_nios2_qsys_0_jtag_debug_module_wrapper|system_nios2_qsys_0_jtag_debug_module_tck:the_system_nios2_qsys_0_jtag_debug_module_tck|DRsize
+Name DRsize.101 DRsize.100 DRsize.011 DRsize.010 DRsize.001 DRsize.000 
+DRsize.000 0 0 0 0 0 0 
+DRsize.001 0 0 0 0 1 1 
+DRsize.010 0 0 0 1 0 1 
+DRsize.011 0 0 1 0 0 1 
+DRsize.100 0 1 0 0 0 1 
+DRsize.101 1 0 0 0 0 1 

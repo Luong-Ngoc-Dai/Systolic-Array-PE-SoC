@@ -1,0 +1,201 @@
+// =============================================================================
+// main.c — Test & Benchmark: CPU Nios II vs FPGA Systolic Array FP16
+// Phien ban toi uu: Do luong dong, tinh toan hieu nang va chi phi bang so nguyen
+// =============================================================================
+
+#include <stdio.h>
+#include <string.h>
+#include "system.h"
+#include "io.h"
+#include "sys/alt_timestamp.h"
+#include "alt_types.h"
+
+// ---------------------------------------------------------------------------
+// Register map — Khop chinh xac voi file matrix_mult_avalon.v va system.h
+// ---------------------------------------------------------------------------
+#define BASE_ADDR    MATRIX_SYSTOLIC_0_BASE
+#define REG_A_BASE   0x00   // Matrix A: word 0x00..0x07 (8 words = 16 phan tu FP16)
+#define REG_B_BASE   0x08   // Matrix B: word 0x08..0x0F
+#define REG_CTRL     0x10   // bit[0] = start
+#define REG_STATUS   0x11   // bit[0] = done
+#define REG_C_BASE   0x18   // Matrix C: word 0x18..0x1F
+
+// ---------------------------------------------------------------------------
+// Cac ham chuyen doi kieu du lieu FP16 <-> FP32
+// ---------------------------------------------------------------------------
+float fp16_to_fp32(unsigned short hp) {
+    unsigned int sign = (hp >> 15) & 1;
+    int          exp  = (hp >> 10) & 0x1F;
+    unsigned int mant = hp        & 0x3FF;
+    unsigned int bits;
+
+    if (exp == 0) {
+        if (mant == 0) {
+            bits = sign << 31;
+        } else {
+            exp = 1;
+            while ((mant & 0x400) == 0) { mant <<= 1; exp--; }
+            mant &= 0x3FF;
+            bits = (sign << 31) | ((unsigned int)(exp - 15 + 127) << 23) | (mant << 13);
+        }
+    } else if (exp == 31) {
+        bits = (sign << 31) | (0xFFu << 23) | (mant << 13);
+    } else {
+        bits = (sign << 31) | ((unsigned int)(exp - 15 + 127) << 23) | (mant << 13);
+    }
+
+    float f;
+    memcpy(&f, &bits, sizeof(f));
+    return f;
+}
+
+unsigned short fp32_to_fp16(float f) {
+    unsigned int bits;
+    memcpy(&bits, &f, sizeof(bits));
+    unsigned int sign =  (bits >> 16) & 0x8000;
+    int          exp  = ((bits >> 23) & 0xFF) - 127 + 15;
+    unsigned int mant =   bits        & 0x7FFFFF;
+
+    if (exp <= 0)  return (unsigned short)sign;
+    if (exp >= 31) return (unsigned short)(sign | 0x7C00);
+    return (unsigned short)(sign | ((unsigned int)exp << 10) | (mant >> 13));
+}
+
+// ---------------------------------------------------------------------------
+// Chuong trinh chinh
+// ---------------------------------------------------------------------------
+int main(void) {
+    printf("\n======================================================\n");
+    printf("   FP16 SYSTOLIC ARRAY 4x4: CPU vs FPGA BENCHMARK\n");
+    printf("======================================================\n");
+
+    // Khoi dong bo dem thoi gian (Timestamp Counter)
+    if (alt_timestamp_start() < 0) {
+        printf("[ERROR] Khong khoi dong duoc timer!\n");
+        return 1;
+    }
+
+    // Khai bao cac bien luu tru cac moc chu ky dong truc quan
+    alt_u32 t_e2e_start, t_e2e_end, t_fpga_e2e_cycles;
+    alt_u32 t_pure_start, t_pure_end, t_fpga_pure_cycles;
+    alt_u32 cpu_start, cpu_end, cpu_cycles;
+
+    // Khoi tao ma tran mau de kiem tra
+    const unsigned short FP16_ZERO = 0x0000;
+    const unsigned short FP16_ONE  = 0x3C00; // Gia tri 1.0 trong dinh dang FP16
+    const unsigned short FP16_TWO  = 0x4000; // Gia tri 2.0 trong dinh dang FP16
+
+    unsigned short A[16], B[16], fpga_C[16], cpu_C[16];
+    int i, r, c, k;
+
+    // A la ma tran duong cheo co gia tri 2.0
+    // B la ma tran don vi I (duong cheo 1.0)
+    // Ky vong: C = A x B = A (Duong cheo bang 2.0)
+    for (i = 0; i < 16; i++) {
+        A[i] = (i % 5 == 0) ? FP16_TWO : FP16_ZERO;
+        B[i] = (i % 5 == 0) ? FP16_ONE : FP16_ZERO;
+    }
+
+    // ==========================================================
+    // PHAN 1: DO LUONG TOAN TRINH VA LOI CUNG FPGA
+    // ==========================================================
+    printf("\n[FPGA] Dang thuc hien nap du lieu, tinh toan va doc ket qua...\n");
+
+    // [MOC CHANT KHONG GIAN 1]: Bat dau tinh thoi gian End-to-End (bao gom ca Nap/Doc qua Bus)
+    t_e2e_start = alt_timestamp();
+
+    // 1. Nap ma tran A (Gop 2 phan tu FP16 vao 1 o nho 32-bit nho Data Packing)
+    for (i = 0; i < 8; i++) {
+        alt_u32 packed = ((alt_u32)A[i*2 + 1] << 16) | (alt_u32)A[i*2];
+        IOWR_32DIRECT(BASE_ADDR, (REG_A_BASE + i) * 4, packed);
+    }
+
+    // 2. Nap ma tran B tuong tu
+    for (i = 0; i < 8; i++) {
+        alt_u32 packed = ((alt_u32)B[i*2 + 1] << 16) | (alt_u32)B[i*2];
+        IOWR_32DIRECT(BASE_ADDR, (REG_B_BASE + i) * 4, packed);
+    }
+
+    // [MOC CHANT KHONG GIAN 2]: Chi bat dau do thoi gian tinh toan PURE HARDWARE cua Co re
+    t_pure_start = alt_timestamp();
+
+    IOWR_32DIRECT(BASE_ADDR, REG_CTRL * 4, 1); // Phat lenh bat dau (start = 1)
+
+    // Vong lap Polling cho den khi dong co Systolic bat co hoan tat (done = 1)
+    while ((IORD_32DIRECT(BASE_ADDR, REG_STATUS * 4) & 0x01) == 0) {
+    }
+
+    t_pure_end = alt_timestamp();
+    t_fpga_pure_cycles = t_pure_end - t_pure_start; // Lay thoi gian cho xu ly loi
+
+    // 3. Doc ma tran ket qua C tu bo nho noi bo FPGA len va thuc hien Unpack
+    for (i = 0; i < 8; i++) {
+        alt_u32 packed = IORD_32DIRECT(BASE_ADDR, (REG_C_BASE + i) * 4);
+        fpga_C[i*2]     = (unsigned short)(packed & 0xFFFF);
+        fpga_C[i*2 + 1] = (unsigned short)(packed >> 16);
+    }
+
+    // [MOC KET THUC]: Chot dung thoi gian toan trinh End-to-End
+    t_e2e_end = alt_timestamp();
+    t_fpga_e2e_cycles = t_e2e_end - t_e2e_start;
+
+    // ==========================================================
+    // PHAN 2: DO LUONG THOI GIAN PHAN MEM CPU SOFTWARE
+    // ==========================================================
+    printf("[CPU]  Dang tinh toan phan mem bang chip Nios II...\n");
+    cpu_start = alt_timestamp();
+
+    for (r = 0; r < 4; r++) {
+        for (c = 0; c < 4; c++) {
+            float sum = 0.0f;
+            for (k = 0; k < 4; k++) {
+                sum += fp16_to_fp32(A[r*4 + k]) * fp16_to_fp32(B[k*4 + c]);
+            }
+            cpu_C[r*4 + c] = fp32_to_fp16(sum);
+        }
+    }
+
+    cpu_end    = alt_timestamp();
+    cpu_cycles = cpu_end - cpu_start;
+
+    // Xac minh kiem tra do trung khop cua hai phuong phap
+    int match = 0;
+    for (i = 0; i < 16; i++) {
+        if (fpga_C[i] == cpu_C[i]) match++;
+    }
+
+    // ==========================================================
+    // PHAN 3: BAO CAO THOI GIAN VA PHAN TICH HIEU NANG
+    // ==========================================================
+    printf("\n======================================================\n");
+    printf("               BAO CAO THOI GIAN THUC THI\n");
+    printf("======================================================\n");
+    printf("1. CPU Software run time          : %lu chu ky\n", (unsigned long)cpu_cycles);
+    printf("2. FPGA Pure Hardware computation : %lu chu ky\n", (unsigned long)t_fpga_pure_cycles);
+    printf("3. FPGA Total End-to-End time     : %lu chu ky (Gom I/O Bus)\n", (unsigned long)t_fpga_e2e_cycles);
+    printf("------------------------------------------------------\n");
+
+    // Thuc hien logic tinh toan ti le tang toc (Speedup) an toan bang cach nhan 100 de tranh dung %f
+    if (t_fpga_pure_cycles > 0 && t_fpga_e2e_cycles > 0) {
+        alt_u32 pure_speedup  = (alt_u32)((float)cpu_cycles / (float)t_fpga_pure_cycles * 100.0f);
+        alt_u32 total_speedup = (alt_u32)((float)cpu_cycles / (float)t_fpga_e2e_cycles * 100.0f);
+
+        printf("=> HIEN THI PHAN TICH:\n");
+        printf(" - Neu chi xet Loi Tinh Toan (Pure Hardware): Speedup = %lu.%02lu lan\n",
+               (unsigned long)(pure_speedup / 100), (unsigned long)(pure_speedup % 100));
+        printf(" - Chenh lech thuc te he thong (End-to-End) : Speedup = %lu.%02lu lan\n",
+               (unsigned long)(total_speedup / 100), (unsigned long)(total_speedup % 100));
+
+        // Tinh toan chi phi Overhead hao phi vao nang luc truyen nhan cua duong Bus Avalon
+        alt_u32 io_overhead = t_fpga_e2e_cycles - t_fpga_pure_cycles;
+        alt_u32 overhead_percent = (alt_u32)((float)io_overhead / (float)t_fpga_e2e_cycles * 100.0f);
+
+        printf(" => Chi phi truyen nhan du lieu (Overhead Bus) chiem: %lu%%\n", (unsigned long)overhead_percent);
+    }
+    printf("------------------------------------------------------\n");
+    printf("Xac minh ma tran: %d/16 phan tu trung khop. -> %s\n",
+           match, (match == 16) ? "CO RE CHAY CHINH XAC!" : "LOI HE THONG KIEN TRUC!");
+    printf("======================================================\n");
+
+    return 0;
+}

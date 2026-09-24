@@ -1,0 +1,96 @@
+// =============================================================================
+// Testbench v4 — matrix_mult_systolic_core
+// Đã sửa lại chính xác quy luật nạp dữ liệu (Data Packing) tương thích với Core v4.
+//
+// Quy tắc Packing của Core: 
+//   wr_addr N → mem[2N] = data[15:0] (Thấp), mem[2N+1] = data[31:16] (Cao)
+//
+// Trải phẳng ma trận 4x4 (Row-Major):
+//   Vị trí đường chéo chính bắt buộc phải nằm ở: mem[0], mem[5], mem[10], mem[15]
+//
+// Ánh xạ gói tin 32-bit:
+//   wA(0, {0, 1}) → mem[0]=1, mem[1]=0
+//   wA(2, {1, 0}) → mem[4]=0, mem[5]=1
+//   wA(4, {0, 1}) → mem[8]=1, mem[9]=0
+//   wA(6, {1, 0}) → mem[12]=0, mem[13]=1
+// =============================================================================
+`timescale 1ns/1ps
+
+module tb_systolic;
+
+reg clk, rst_n;
+initial clk = 0;
+always #10 clk = ~clk; // Chu kỳ clock 20ns
+
+reg  [2:0]  wr_addr_a, wr_addr_b;
+reg  [31:0] wr_data_a, wr_data_b;
+reg         wr_en_a, wr_en_b;
+reg         start;
+wire        done;
+reg  [2:0]  rd_addr_c;
+wire [31:0] rd_data_c;
+
+// Kết nối với module Core phần cứng
+matrix_mult_systolic_core dut (
+    .clk       (clk), .rst_n    (rst_n),
+    .wr_addr_a (wr_addr_a), .wr_data_a(wr_data_a), .wr_en_a(wr_en_a),
+    .wr_addr_b (wr_addr_b), .wr_data_b(wr_data_b), .wr_en_b(wr_en_b),
+    .start     (start),     .done     (done),
+    .rd_addr_c (rd_addr_c), .rd_data_c(rd_data_c)
+);
+
+// Định nghĩa hằng số định dạng FP16 (Bán chính xác)
+localparam FP16_ZERO = 16'h0000; // 0.0
+localparam FP16_ONE  = 16'h3C00; // 1.0
+localparam FP16_TWO  = 16'h4000; // 2.0
+
+// Task ghi ma trận A (Ghi 2 phần tử FP16 packed vào 1 word 32-bit)
+task wA; input [2:0] a; input [31:0] d;
+    begin 
+        @(posedge clk); wr_addr_a <= a; wr_data_a <= d; wr_en_a <= 1;
+        @(posedge clk); wr_en_a <= 0; 
+    end
+endtask
+
+// Task ghi ma trận B
+task wB; input [2:0] a; input [31:0] d;
+    begin 
+        @(posedge clk); wr_addr_b <= a; wr_data_b <= d; wr_en_b <= 1;
+        @(posedge clk); wr_en_b <= 0; 
+    end
+endtask
+
+// Task kích hoạt FSM chạy và đợi xung DONE từ phần cứng
+task run_and_wait;
+    begin
+        @(posedge clk); start <= 1;
+        @(posedge clk); start <= 0;
+        wait(done); @(posedge clk);
+        $display("[%0t ns] DONE SIGNAL RECEIVED", $time);
+    end
+endtask
+
+// Task kiểm tra kết quả đầu ra từng Word C (Chứa 2 phần tử FP16 công thêm)
+task check_word;
+    input [2:0]  addr;
+    input [15:0] exp_lo, exp_hi;
+    input integer base_idx;
+    reg [31:0] d;
+    begin
+        rd_addr_c = addr;   // Đọc tổ hợp (Combinational Assign)
+        #1;                 // Đợi tín hiệu lan truyền mạch đích
+        d = rd_data_c;
+        
+        // Kiểm tra phần tử chỉ số chẵn (lo_bits)
+        if (d[15:0] === exp_lo)
+            $display("   PASS C[%0d] = 0x%04X", base_idx,   d[15:0]);
+        else
+            $display("   FAIL C[%0d] = 0x%04X  (exp 0x%04X) ***", base_idx,   d[15:0], exp_lo);
+            
+        // Kiểm tra phần tử chỉ số lẻ (hi_bits)
+        if (d[31:16] === exp_hi)
+            $display("   PASS C[%0d] = 0x%04X", base_idx+1, d[31:16]);
+        else
+            $display("   FAIL C[%0d] = 0x%04X  (exp 0x%04X) ***", base_idx+1, d[31:16], exp_hi);
+    end
+endtask

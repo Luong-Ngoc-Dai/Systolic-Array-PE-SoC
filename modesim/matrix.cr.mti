@@ -1,0 +1,64 @@
+C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/fp16_mult.v {1 {vlog -work work C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/fp16_mult.v
+Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+-- Compiling module fp16_mult
+
+Top level modules:
+	fp16_mult
+
+} {} {}} C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/systolic_pe.v {1 {vlog -work work C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/systolic_pe.v
+Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+-- Compiling module systolic_pe
+
+Top level modules:
+	systolic_pe
+
+} {} {}} C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/matrix_mult_systolic_core.v {1 {vlog -work work C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/matrix_mult_systolic_core.v
+Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+-- Compiling module matrix_mult_systolic_core
+
+Top level modules:
+	matrix_mult_systolic_core
+
+} {} {}} C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/tb_matrix_mult.v {1 {vlog -work work C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/tb_matrix_mult.v
+Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+-- Compiling module tb_matrix_mult
+
+Top level modules:
+	tb_matrix_mult
+
+} {} {}} C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/matrix_mult_avalon_2.v {1 {vlog -work work C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/matrix_mult_avalon_2.v
+Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+-- Compiling module matrix_mult_avalon_2
+
+Top level modules:
+	matrix_mult_avalon_2
+
+} {} {}} C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/tb_systolic.v {1 {vlog -work work C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/tb_systolic.v
+Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+-- Compiling module tb_systolic
+
+Top level modules:
+	tb_systolic
+
+} {} {}} C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/matrix_mult_4x4.v {1 {vlog -work work C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/matrix_mult_4x4.v
+Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+-- Compiling module matrix_mult_4x4
+
+Top level modules:
+	matrix_mult_4x4
+
+} {} {}} C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/fp16_add.v {1 {vlog -work work C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/fp16_add.v
+Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+-- Compiling module fp16_add
+
+Top level modules:
+	fp16_add
+
+} {} {}} C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/top_de2.v {1 {vlog -work work C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/top_de2.v
+Model Technology ModelSim ALTERA vlog 10.1d Compiler 2012.11 Nov  2 2012
+-- Compiling module top_de2
+
+Top level modules:
+	top_de2
+
+} {} {}}

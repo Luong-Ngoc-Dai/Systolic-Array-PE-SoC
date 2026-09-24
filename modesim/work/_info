@@ -1,0 +1,195 @@
+m255
+K3
+13
+cModel Technology
+Z0 dC:\altera\13.0sp1
+vfp16_add
+Z1 !s100 dQcSL9o_2O:GVc14>Ek<K2
+Z2 INYMK`KilNA8H6O0B`W1Rh1
+Z3 V>1F<]hl8kKlDTiGi4C8nY2
+Z4 dC:\Nam_3_HK2_2025_2026\Thiet_ke_he_thong_SOC\modesim_SOC
+Z5 w1779595720
+Z6 8C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/fp16_add.v
+Z7 FC:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/fp16_add.v
+L0 19
+Z8 OV;L;10.1d;51
+r1
+31
+Z9 !s90 -reportprogress|300|-work|work|C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/fp16_add.v|
+Z10 o-work work -O0
+Z11 !s108 1780709271.050000
+Z12 !s107 C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/fp16_add.v|
+!i10b 1
+!s85 0
+!s101 -O0
+vfp16_mult
+Z13 !s100 `1_Dn]lg8B5b?CHPKn<<=2
+Z14 I8F_odLGlIaYE]c?kZBgl13
+Z15 V:hLHITi;=<MNTZ_<VN3ck1
+R4
+R5
+Z16 8C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/fp16_mult.v
+Z17 FC:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/fp16_mult.v
+L0 23
+R8
+r1
+31
+Z18 !s90 -reportprogress|300|-work|work|C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/fp16_mult.v|
+R10
+Z19 !s108 1780709271.132000
+Z20 !s107 C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/fp16_mult.v|
+!i10b 1
+!s85 0
+!s101 -O0
+vmatrix_mult_4x4
+Z21 !s100 a;80b]Z5zOP=]E8QNVMWP2
+Z22 IbTfz9P4l^g8ib6<e8QF0L1
+Z23 VCOMe5DNeG_AF`9HfY]Ho51
+R4
+Z24 w1779723669
+Z25 8C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/matrix_mult_4x4.v
+Z26 FC:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/matrix_mult_4x4.v
+L0 23
+R8
+r1
+31
+Z27 !s90 -reportprogress|300|-work|work|C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/matrix_mult_4x4.v|
+R10
+Z28 !s108 1780709271.194000
+Z29 !s107 C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/matrix_mult_4x4.v|
+!i10b 1
+!s85 0
+!s101 -O0
+vmatrix_mult_avalon_2
+Z30 !s100 @Cb83Q_7mU<liUcPiaAKj1
+Z31 IdZ<OdWM89<egbKVT4^dWd1
+Z32 VI6@<Sh35O<G^E;T1^7W@91
+R4
+Z33 w1780054719
+Z34 8C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/matrix_mult_avalon_2.v
+Z35 FC:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/matrix_mult_avalon_2.v
+L0 10
+R8
+r1
+31
+Z36 !s90 -reportprogress|300|-work|work|C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/matrix_mult_avalon_2.v|
+R10
+Z37 !s108 1780709271.397000
+Z38 !s107 C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/matrix_mult_avalon_2.v|
+!i10b 1
+!s85 0
+!s101 -O0
+vmatrix_mult_systolic_core
+Z39 !s100 PPDa@GnDndZH[YRjkX2kL0
+Z40 Ii^KL[7[kgJdcbc0OZR:i@2
+Z41 VNRgZXaDKcJ`^l_[PW[dFa1
+R4
+Z42 w1780204665
+Z43 8C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/matrix_mult_systolic_core.v
+Z44 FC:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/matrix_mult_systolic_core.v
+L0 12
+R8
+r1
+31
+Z45 !s90 -reportprogress|300|-work|work|C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/matrix_mult_systolic_core.v|
+R10
+Z46 !s108 1780709271.461000
+Z47 !s107 C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/matrix_mult_systolic_core.v|
+!i10b 1
+!s85 0
+!s101 -O0
+vmatrix_mult_systolic_core_tb
+Z48 IDddHS?H[zMHO10G1;m2Oe1
+Z49 Va7enzLDoBSF=mi<o>3AGM1
+R4
+Z50 w1780018683
+Z51 8C:\Nam_3_HK2_2025_2026\Thiet_ke_he_thong_SOC\modesim_SOC\matrix_mult_systolic_core_tb.v
+Z52 FC:\Nam_3_HK2_2025_2026\Thiet_ke_he_thong_SOC\modesim_SOC\matrix_mult_systolic_core_tb.v
+L0 8
+R8
+r1
+31
+Z53 !s90 -reportprogress|300|-work|work|C:\Nam_3_HK2_2025_2026\Thiet_ke_he_thong_SOC\modesim_SOC\matrix_mult_systolic_core_tb.v|
+R10
+Z54 !s100 ]YQMPl^FR`KeF:8J>aCQN2
+Z55 !s108 1780018691.625000
+Z56 !s107 C:\Nam_3_HK2_2025_2026\Thiet_ke_he_thong_SOC\modesim_SOC\matrix_mult_systolic_core_tb.v|
+!i10b 1
+!s85 0
+!s101 -O0
+vsystolic_pe
+Z57 !s100 DVY?]QdLGh14z``MlY:;R0
+Z58 I>Qd3AC_?Lzi1aIi]:0AmY3
+Z59 VCl2z5aHH?[n=jc``PSof[1
+R4
+Z60 w1780054715
+Z61 8C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/systolic_pe.v
+Z62 FC:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/systolic_pe.v
+L0 10
+R8
+r1
+31
+Z63 !s90 -reportprogress|300|-work|work|C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/systolic_pe.v|
+R10
+!i10b 1
+!s85 0
+Z64 !s108 1780709271.524000
+Z65 !s107 C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/systolic_pe.v|
+!s101 -O0
+vtb_matrix_mult
+Z66 !s100 0o6V[z0d0W[QVE7kc86Mk2
+Z67 IlA=Qh87OhJ0:1T?29lZFc3
+Z68 V0lg?BWfT9o]olAP_B?z7h2
+R4
+R5
+Z69 8C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/tb_matrix_mult.v
+Z70 FC:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/tb_matrix_mult.v
+L0 29
+R8
+r1
+31
+Z71 !s90 -reportprogress|300|-work|work|C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/tb_matrix_mult.v|
+R10
+Z72 !s108 1780709271.260000
+Z73 !s107 C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/tb_matrix_mult.v|
+!i10b 1
+!s85 0
+!s101 -O0
+vtb_systolic
+!i10b 1
+Z74 !s100 oNKgk<2:cfAc>^E1;:ofj0
+Z75 Izfg<hJ5J?nfjPgL602fQQ3
+Z76 VTF[U7VG93PQ:ffkQOB5CL0
+R4
+Z77 w1780054722
+Z78 8C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/tb_systolic.v
+Z79 FC:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/tb_systolic.v
+L0 7
+R8
+r1
+!s85 0
+31
+!s108 1780709271.584000
+!s107 C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/tb_systolic.v|
+Z80 !s90 -reportprogress|300|-work|work|C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/tb_systolic.v|
+!s101 -O0
+R10
+vtop_de2
+Z81 !s100 W?FRzXgj[2QFIfe@SX6l93
+Z82 IJeb=UGcojLLG;gIC8IZX?1
+Z83 VLLXjTVa]@l_m:nz[Q2F1N2
+R4
+R5
+Z84 8C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/top_de2.v
+Z85 FC:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/top_de2.v
+L0 38
+R8
+r1
+31
+Z86 !s90 -reportprogress|300|-work|work|C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/top_de2.v|
+R10
+Z87 !s108 1780709271.332000
+Z88 !s107 C:/Nam_3_HK2_2025_2026/Thiet_ke_he_thong_SOC/modesim_SOC/top_de2.v|
+!i10b 1
+!s85 0
+!s101 -O0

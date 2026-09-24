@@ -1,5 +1,3 @@
-<img width="551" height="428" alt="Biểu đồ không có tiêu đề drawio (7)" src="https://github.com/user-attachments/assets/d421f4c4-2b64-4f4c-9da5-3a4d153f3c02" /># Systolic Array PE SoC
-
 ## 1. Giới thiệu
 
 Đồ án thiết kế và hiện thực **bộ tăng tốc nhân ma trận sử dụng kiến trúc Systolic Array** trên FPGA.
@@ -26,7 +24,7 @@ Thiết kế được thực hiện bằng **Verilog HDL** và kiểm tra chức
 Kiến trúc tổng thể của hệ thống:
 
 ```mermaid
-<img width="551" height="428" alt="Biểu đồ không có tiêu đề drawio (7)" src="https://github.com/user-attachments/assets/78f38db1-d58c-4c2a-a54a-006eb98f1ebc" />
+![Kiến trúc hệ thống](images/system_architecture.png)
 
 ```
 
@@ -45,7 +43,7 @@ Trong đó:
 Systolic Array được xây dựng từ nhiều Processing Element (PE) được kết nối với nhau.
 
 ```mermaid
-<img width="755" height="747" alt="image" src="https://github.com/user-attachments/assets/06e80ca9-5274-47be-9cd8-bcbde2c337b0" />
+![Systolic PE](images/Systolic-Pe.png)>
 
 ```
 
@@ -60,7 +58,7 @@ Kiến trúc này cho phép nhiều phép tính được thực hiện song song
 Processing Element là đơn vị tính toán cơ bản của Systolic Array.
 
 ```mermaid
-<img width="400" height="241" alt="image" src="https://github.com/user-attachments/assets/e48561b7-67ea-45f6-b39d-b432a7f836c4" />
+![Processing Element](images/pe_architecture.png)>
 
 ```
 
@@ -70,23 +68,8 @@ Thiết kế sử dụng các module tính toán **FP16** cho các phép toán s
 
 ---
 
-## 6. Tích hợp SoC
 
-Bộ tăng tốc Systolic Array được tích hợp vào hệ thống SoC trên FPGA.
-
-```mermaid
-flowchart LR
-    CPU[Nios II] -->|Avalon-MM| CTRL[Hardware Control]
-    CTRL --> SA[Systolic Array Accelerator]
-    SA --> RESULT[Matrix Result]
-    RESULT -->|Avalon-MM| CPU
-```
-
-Nios II thực hiện việc cấu hình và điều khiển bộ tăng tốc thông qua giao tiếp Avalon-MM.
-
----
-
-## 7. Mô phỏng và kiểm tra
+## 6. Mô phỏng và kiểm tra
 
 Thiết kế RTL được mô phỏng bằng **ModelSim**.
 
@@ -110,7 +93,7 @@ Các waveform được sử dụng để quan sát tín hiệu và kiểm tra ho
 
 ---
 
-## 8. Công nghệ sử dụng
+## 7. Công nghệ sử dụng
 
 | Thành phần | Công nghệ |
 |---|---|
@@ -125,7 +108,7 @@ Các waveform được sử dụng để quan sát tín hiệu và kiểm tra ho
 
 ---
 
-## 9. Cấu trúc repository
+## 8. Cấu trúc repository
 
 ```text
 Systolic-Array-PE-SoC/
@@ -144,7 +127,7 @@ Systolic-Array-PE-SoC/
 ```
 
 
-## 10. Kết quả
+## 9. Kết quả
 
 Đồ án đã xây dựng được một hệ thống tăng tốc nhân ma trận dựa trên kiến trúc Systolic Array, tích hợp vào SoC và được kiểm tra thông qua mô phỏng ModelSim.
 
